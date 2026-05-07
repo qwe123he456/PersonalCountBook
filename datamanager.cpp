@@ -1,3 +1,6 @@
+/** @file 数据管理器DataManager类的实现
+ */
+
 #include "datamanager.h"
 #include <QFile>
 #include <QDataStream>
@@ -5,6 +8,9 @@
 #include <algorithm>
 #include <QDebug>
 
+/** @brief 构造函数
+ * @return
+ */
 DataManager::DataManager()
 {
     // 初始化测试数据
@@ -14,16 +20,27 @@ DataManager::DataManager()
     };
 }
 
+/** @brief 获取所有记录
+ * @return 记录列表的引用
+ */
 const QVector<Item> &DataManager::getItems() const
 {
     return m_items;
 }
 
+/** @brief 添加记录
+ * @param item 要添加的记录
+ * @return
+ */
 void DataManager::addItem(const Item &item)
 {
     m_items.append(item);
 }
 
+/** @brief 删除记录
+ * @param index 要删除的记录索引
+ * @return
+ */
 void DataManager::deleteItem(int index)
 {
     if (index >= 0 && index < m_items.size())
@@ -32,6 +49,11 @@ void DataManager::deleteItem(int index)
     }
 }
 
+/** @brief 修改记录
+ * @param index 要修改的记录索引
+ * @param item 修改后的记录内容
+ * @return
+ */
 void DataManager::modifyItem(int index, const Item &item)
 {
     if (index >= 0 && index < m_items.size())
@@ -40,6 +62,10 @@ void DataManager::modifyItem(int index, const Item &item)
     }
 }
 
+/** @brief 按日期查找记录
+ * @param keyword 日期关键字
+ * @return 匹配的记录索引列表
+ */
 QVector<int> DataManager::searchByDate(const QString &keyword) const
 {
     QVector<int> results;
@@ -58,6 +84,10 @@ QVector<int> DataManager::searchByDate(const QString &keyword) const
     return results;
 }
 
+/** @brief 按明细查找记录
+ * @param keyword 明细关键字
+ * @return 匹配的记录索引列表
+ */
 QVector<int> DataManager::searchByDesc(const QString &keyword) const
 {
     QVector<int> results;
@@ -71,6 +101,10 @@ QVector<int> DataManager::searchByDesc(const QString &keyword) const
     return results;
 }
 
+/** @brief 按类型查找记录
+ * @param keyword 类型关键字
+ * @return 匹配的记录索引列表
+ */
 QVector<int> DataManager::searchByCategory(const QString &keyword) const
 {
     QVector<int> results;
@@ -86,6 +120,10 @@ QVector<int> DataManager::searchByCategory(const QString &keyword) const
     return results;
 }
 
+/** @brief 按金额查找记录
+ * @param keyword 金额关键字
+ * @return 匹配的记录索引列表
+ */
 QVector<int> DataManager::searchByAmount(const QString &keyword) const
 {
     QVector<int> results;
@@ -99,56 +137,75 @@ QVector<int> DataManager::searchByAmount(const QString &keyword) const
     return results;
 }
 
+/** @brief 按日期升序排序
+ * @return
+ */
 void DataManager::sortByDateAsc()
 {
-    std::sort(m_items.begin(), m_items.end(), [](const Item &a, const Item &b) {
+    std::sort(m_items.begin(), m_items.end(), [](const Item &a, const Item &b)
+              {
         if (a.date.year != b.date.year)
             return a.date.year < b.date.year;
         if (a.date.month != b.date.month)
             return a.date.month < b.date.month;
-        return a.date.day < b.date.day;
-    });
+        return a.date.day < b.date.day; });
 }
 
+/** @brief 按日期降序排序
+ * @return
+ */
 void DataManager::sortByDateDesc()
 {
-    std::sort(m_items.begin(), m_items.end(), [](const Item &a, const Item &b) {
+    std::sort(m_items.begin(), m_items.end(), [](const Item &a, const Item &b)
+              {
         if (a.date.year != b.date.year)
             return a.date.year > b.date.year;
         if (a.date.month != b.date.month)
             return a.date.month > b.date.month;
-        return a.date.day > b.date.day;
-    });
+        return a.date.day > b.date.day; });
 }
 
+/** @brief 按金额升序排序
+ * @return
+ */
 void DataManager::sortByAmountAsc()
 {
-    std::sort(m_items.begin(), m_items.end(), [](const Item &a, const Item &b) {
-        return a.amount < b.amount;
-    });
+    std::sort(m_items.begin(), m_items.end(), [](const Item &a, const Item &b)
+              { return a.amount < b.amount; });
 }
 
+/** @brief 按金额降序排序
+ * @return
+ */
 void DataManager::sortByAmountDesc()
 {
-    std::sort(m_items.begin(), m_items.end(), [](const Item &a, const Item &b) {
-        return a.amount > b.amount;
-    });
+    std::sort(m_items.begin(), m_items.end(), [](const Item &a, const Item &b)
+              { return a.amount > b.amount; });
 }
 
+/** @brief 按明细升序排序
+ * @return
+ */
 void DataManager::sortByDescAsc()
 {
-    std::sort(m_items.begin(), m_items.end(), [](const Item &a, const Item &b) {
-        return a.desc < b.desc;
-    });
+    std::sort(m_items.begin(), m_items.end(), [](const Item &a, const Item &b)
+              { return a.desc < b.desc; });
 }
 
+/** @brief 按明细降序排序
+ * @return
+ */
 void DataManager::sortByDescDesc()
 {
-    std::sort(m_items.begin(), m_items.end(), [](const Item &a, const Item &b) {
-        return a.desc > b.desc;
-    });
+    std::sort(m_items.begin(), m_items.end(), [](const Item &a, const Item &b)
+              { return a.desc > b.desc; });
 }
 
+/** @brief 按年份统计
+ * @param startYear 起始年份
+ * @param endYear 结束年份
+ * @return 统计结果字符串
+ */
 QString DataManager::statisticsByYear(int startYear, int endYear) const
 {
     QMap<int, QPair<int, int>> yearStats;
@@ -183,6 +240,13 @@ QString DataManager::statisticsByYear(int startYear, int endYear) const
     return result;
 }
 
+/** @brief 按月份统计
+ * @param startYear 起始年份
+ * @param startMonth 起始月份
+ * @param endYear 结束年份
+ * @param endMonth 结束月份
+ * @return 统计结果字符串
+ */
 QString DataManager::statisticsByMonth(int startYear, int startMonth, int endYear, int endMonth) const
 {
     QMap<QString, QPair<int, int>> monthStats;
@@ -220,6 +284,9 @@ QString DataManager::statisticsByMonth(int startYear, int startMonth, int endYea
     return result;
 }
 
+/** @brief 按类型统计
+ * @return 统计结果字符串
+ */
 QString DataManager::statisticsByCategory() const
 {
     QMap<Category, QPair<int, int>> catStats;
@@ -251,6 +318,10 @@ QString DataManager::statisticsByCategory() const
     return result;
 }
 
+/** @brief 保存数据到文件
+ * @param fileName 文件路径
+ * @return 是否保存成功
+ */
 bool DataManager::saveToFile(const QString &fileName) const
 {
     qDebug() << "保存记录数量:" << m_items.size();
@@ -281,6 +352,10 @@ bool DataManager::saveToFile(const QString &fileName) const
     return true;
 }
 
+/** @brief 从文件读取数据
+ * @param fileName 文件路径
+ * @return 是否读取成功
+ */
 bool DataManager::loadFromFile(const QString &fileName)
 {
     qDebug() << "读取文件路径:" << fileName;
@@ -321,6 +396,10 @@ bool DataManager::loadFromFile(const QString &fileName)
     return true;
 }
 
+/** @brief 类型转换为英文字符串
+ * @param cat 类型
+ * @return 英文字符串
+ */
 QString DataManager::categoryToString(Category cat)
 {
     switch (cat)
@@ -335,6 +414,10 @@ QString DataManager::categoryToString(Category cat)
     return "study";
 }
 
+/** @brief 类型转换为显示字符串
+ * @param cat 类型
+ * @return 中文显示字符串
+ */
 QString DataManager::categoryToDisplayString(Category cat)
 {
     switch (cat)
@@ -349,6 +432,10 @@ QString DataManager::categoryToDisplayString(Category cat)
     return "学习";
 }
 
+/** @brief 格式化金额显示
+ * @param amount 金额
+ * @return 格式化后的字符串
+ */
 QString DataManager::formatAmount(int amount)
 {
     if (amount > 0)

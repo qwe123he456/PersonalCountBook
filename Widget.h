@@ -1,3 +1,6 @@
+/** @file 主窗口Widget类的定义
+ */
+
 #ifndef WIDGET_H
 #define WIDGET_H
 
@@ -27,12 +30,25 @@
 
 #include "datamanager.h"
 
+/**
+ * @brief 主窗口类
+ *
+ */
 class Widget : public QWidget
 {
     Q_OBJECT
 
 public:
+    /**
+     * @brief 构造函数
+     * @param parent 父窗口指针
+     * @return
+     */
     explicit Widget(QWidget *parent = nullptr);
+    /**
+     * @brief 析构函数
+     * @return
+     */
     ~Widget() override;
 
 private:
@@ -56,17 +72,57 @@ private:
     QLineEdit *descLineEdit;
     QPushButton *addButton;
 
+    /**
+     * @brief 初始化所有UI组件
+     * @return
+     */
     void setupUI();
+    /**
+     * @brief 刷新显示表格数据
+     * @return
+     */
     void loadDataToTable();
 
 private slots:
+    /**
+     * @brief 新增记录
+     * @return
+     */
     void onAddClicked();
+    /**
+     * @brief 删除记录
+     * @return
+     */
     void onDeleteClicked();
+    /**
+     * @brief 修改记录
+     * @return
+     */
     void onModifyClicked();
+    /**
+     * @brief 查找记录
+     * @return
+     */
     void onSearchClicked();
+    /**
+     * @brief 排序记录
+     * @return
+     */
     void onSortClicked();
+    /**
+     * @brief 统计功能
+     * @return
+     */
     void onStatisticsClicked();
+    /**
+     * @brief 保存数据
+     * @return
+     */
     void onSaveClicked();
+    /**
+     * @brief 读取数据
+     * @return
+     */
     void onLoadClicked();
 };
 

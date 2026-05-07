@@ -1,10 +1,12 @@
+/** @file 主窗口Widget类的实现
+ */
+
 #include "Widget.h"
 #include <QHeaderView>
 
-/* ============================================================
- * Widget类的实现
- * ============================================================ */
-
+/** @brief 主窗口类
+ *
+ */
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
 {
@@ -15,7 +17,9 @@ Widget::Widget(QWidget *parent)
 
 Widget::~Widget() = default;
 
-/* 初始化所有UI组件 */
+/** @brief 初始化所有UI组件
+ *
+ */
 void Widget::setupUI()
 {
     resize(900, 650);
@@ -96,7 +100,9 @@ void Widget::setupUI()
     connect(loadAction, &QAction::triggered, this, &Widget::onLoadClicked);
 }
 
-/* 刷新显示表格数据 */
+/** @brief 刷新显示表格数据
+ *
+ */
 void Widget::loadDataToTable()
 {
     const QVector<Item> &items = m_dataManager->getItems();
@@ -129,9 +135,12 @@ void Widget::loadDataToTable()
     }
 }
 
-/* ======槽函数实现====== */
+/* ======槽函数实现======
+ */
 
-/* ---- 新增记录 ---- */
+/** @brief 新增记录
+ *
+ */
 void Widget::onAddClicked()
 {
     QDate qdate = dateEdit->date();
@@ -148,7 +157,9 @@ void Widget::onAddClicked()
     amountSpinBox->setValue(0);
 }
 
-/* ---- 删除记录 ---- */
+/** @brief 删除记录
+ *
+ */
 void Widget::onDeleteClicked()
 {
     int currentRow = tableWidget->currentRow();
@@ -169,7 +180,9 @@ void Widget::onDeleteClicked()
     }
 }
 
-/* ---- 修改记录 ---- */
+/** @brief 修改记录
+ *
+ */
 void Widget::onModifyClicked()
 {
     int currentRow = tableWidget->currentRow();
@@ -232,7 +245,9 @@ void Widget::onModifyClicked()
     }
 }
 
-/* ---- 查找记录 ---- */
+/** @brief 查找记录
+ *
+ */
 void Widget::onSearchClicked()
 {
     QDialog dialog(this);
@@ -307,7 +322,9 @@ void Widget::onSearchClicked()
     dialog.exec();
 }
 
-/* ---- 排序记录 ---- */
+/** @brief 排序记录
+ *
+ */
 void Widget::onSortClicked()
 {
     QStringList items;
@@ -336,7 +353,9 @@ void Widget::onSortClicked()
     QMessageBox::information(this, "排序", "排序完成!");
 }
 
-/* ---- 统计功能 ---- */
+/** @brief 统计功能
+ *
+ */
 void Widget::onStatisticsClicked()
 {
     QDialog dialog(this);
@@ -387,7 +406,9 @@ void Widget::onStatisticsClicked()
     dialog.exec();
 }
 
-/* ---- 保存数据 ---- */
+/** @brief 保存数据
+ *
+ */
 void Widget::onSaveClicked()
 {
     QString fileName = QFileDialog::getSaveFileName(this, "保存文件", "", "Data Files (*.dat)");
@@ -400,7 +421,9 @@ void Widget::onSaveClicked()
         QMessageBox::critical(this, "错误", "无法打开文件进行写入!");
 }
 
-/* ---- 读取数据 ---- */
+/** @brief 读取数据
+ *
+ */
 void Widget::onLoadClicked()
 {
     QString fileName = QFileDialog::getOpenFileName(this, "打开文件", "", "Data Files (*.dat)");
