@@ -2,6 +2,7 @@
  */
 
 #include "Widget.h"
+#include "item.h"
 #include <QHeaderView>
 
 /** @brief 主窗口类
@@ -434,12 +435,16 @@ void Widget::onStatisticsClicked()
     layout->addLayout(form);
 
     QPushButton *statBtn = new QPushButton("统计", &dialog);
-    layout->addWidget(statBtn);
+    QPushButton *chartBtn = new QPushButton("饼状图", &dialog);
+    QHBoxLayout *btnLayout = new QHBoxLayout();
+    btnLayout->addWidget(statBtn);
+    btnLayout->addWidget(chartBtn);
+    layout->addLayout(btnLayout);
 
     QTextBrowser *resultBrowser = new QTextBrowser(&dialog);
     layout->addWidget(resultBrowser);
 
-    connect(statBtn, &QPushButton::clicked, [&]()
+    connect(statBtn, &QPushButton::clicked, this, [&]()
             {
         QDate start = startDate->date();
         QDate end = endDate->date();
@@ -454,6 +459,134 @@ void Widget::onStatisticsClicked()
             result = m_dataManager->statisticsByCategory();
 
         resultBrowser->setText(result); });
+
+    connect(chartBtn, &QPushButton::clicked, this, [&]()
+            {
+        QDate start = startDate->date();
+        QDate end = endDate->date();
+        int type = statType->currentIndex();
+
+        QDialog chartDialog(this);
+        chartDialog.setWindowTitle("饼状图");
+        chartDialog.resize(1200, 700);
+        QVBoxLayout *chartLayout = new QVBoxLayout(&chartDialog);
+
+        QVector<QPair<QString, int>> pieData;
+        QString title;
+
+        if (type == 0)
+        {
+            title = "按年份统计";
+            QMap<int, QPair<int, int>> yearStats = m_dataManager->getYearStats(start.year(), end.year());
+            for (auto it = yearStats.begin(); it != yearStats.end(); ++it)
+            {
+                int total = it.value().first + it.value().second;
+                if (total != 0)
+                    pieData.append(qMakePair(QString::number(it.key()), total));
+            }
+        }
+        else if (type == 1)
+        {
+            title = "按月份统计";
+            QMap<QString, QPair<int, int>> monthStats = m_dataManager->getMonthStats(
+                start.year(), start.month(), end.year(), end.month());
+            for (auto it = monthStats.begin(); it != monthStats.end(); ++it)
+            {
+                int total = it.value().first + it.value().second;
+                if (total != 0)
+                    pieData.append(qMakePair(it.key(), total));
+            }
+        }
+        else
+        {
+            title = "按类型统计";
+            QMap<Category, QPair<int, int>> catStats = m_dataManager->getCategoryStats();
+            for (int c = study; c <= job; c = (Category)(c + 1))
+            {
+                QString catName = DataManager::categoryToDisplayString((Category)c);
+                int total = catStats[(Category)c].first + catStats[(Category)c].second;
+                if (total != 0)
+                    pieData.append(qMakePair(catName, total));
+            }
+        }
+
+        QPixmap pix(1100, 700);
+        pix.fill(Qt::white);
+        QPainter painter(&pix);
+        painter.setRenderHint(QPainter::Antialiasing);
+
+        QFont font;
+        font.setPixelSize(20);
+        painter.setFont(font);
+        painter.setPen(Qt::black);
+        painter.drawText(pix.rect().adjusted(0, 40, 0, -800), Qt::AlignHCenter | Qt::AlignTop, title);
+
+        int totalValue = 0;
+        for (auto &data : pieData)
+            totalValue += qAbs(data.second);
+
+        if (totalValue == 0 || pieData.isEmpty())
+        {
+            painter.drawText(pix.rect(), Qt::AlignCenter, "无数据");
+        }
+        else
+        {
+            QVector<QColor> colors = {Qt::red, Qt::green, Qt::blue, Qt::cyan, Qt::magenta, Qt::yellow,
+                                     Qt::darkRed, Qt::darkGreen, Qt::darkBlue, Qt::darkCyan, Qt::darkMagenta, Qt::darkYellow};
+            int startAngle = 0;
+            int colorIndex = 0;
+
+            int centerX = 400;
+            int centerY = 360;
+            int radius = 240;
+
+            for (auto &data : pieData)
+            {
+                int value = qAbs(data.second);
+                int spanAngle = (value * 360 * 16) / totalValue;
+                QColor color = colors[colorIndex % colors.size()];
+                painter.setBrush(color);
+                painter.setPen(Qt::white);
+                painter.drawPie(centerX - radius, centerY - radius, radius * 2, radius * 2, startAngle, spanAngle);
+
+                double percentage = (double)value / totalValue * 100;
+                int midAngle = startAngle + spanAngle / 2;
+                double rad = midAngle * 3.14159265 / (16 * 180);
+                int labelX = centerX + (radius * 0.6) * qCos(rad) - 40;
+                int labelY = centerY - (radius * 0.6) * qSin(rad) + 10;
+
+                painter.setPen(Qt::black);
+                painter.drawText(labelX, labelY, QString::number(percentage, 'f', 1) + "%");
+
+                startAngle += spanAngle;
+                colorIndex++;
+            }
+
+            painter.setPen(Qt::black);
+            int legendX = 760;
+            int legendY = 100;
+            colorIndex = 0;
+            for (auto &data : pieData)
+            {
+                QColor color = colors[colorIndex % colors.size()];
+                painter.setBrush(color);
+                painter.setPen(Qt::black);
+                painter.drawRect(legendX, legendY + colorIndex * 60, 40, 40);
+                double percentage = (double)qAbs(data.second) / totalValue * 100;
+                painter.drawText(legendX + 50, legendY + colorIndex * 60 + 30,
+                            QString("%1: %2 (%3%)")
+                                .arg(data.first)
+                                .arg(DataManager::formatAmount(data.second))
+                                .arg(percentage, 0, 'f', 1));
+                colorIndex++;
+            }
+        }
+
+        QLabel *pieLabel = new QLabel(&chartDialog);
+        pieLabel->setPixmap(pix);
+        chartLayout->addWidget(pieLabel);
+
+        chartDialog.exec(); });
 
     dialog.exec();
 }

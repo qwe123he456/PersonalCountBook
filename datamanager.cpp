@@ -6,7 +6,6 @@
 #include <QDataStream>
 #include <QDate>
 #include <algorithm>
-#include <QDebug>
 
 /** @brief 构造函数
  *
@@ -15,16 +14,16 @@ DataManager::DataManager()
 {
     // 初始化测试数据
     m_items = {
-        Item(Date(2019, 3, 15), life, "3月份房租加水电物业费", -2400),
-        Item(Date(2019, 7, 22), study, "购买C++ Prime Plus技术书", -129),
-        Item(Date(2020, 1, 10), job, "1月份实习工资到账", +8000),
-        Item(Date(2020, 9, 1), study, "研究生新生入学奖学金", +5000),
         Item(Date(2021, 6, 18), job, "公司团建去三亚自费部分", -3999),
-        Item(Date(2021, 12, 25), life, "圣诞节请朋友吃火锅", -598),
-        Item(Date(2022, 8, 5), job, "8月份正式入职第一份薪水", +12000),
-        Item(Date(2023, 4, 12), study, "项目结题验收劳务费", +2000),
+        Item(Date(2019, 7, 22), study, "购买C++ Prime Plus技术书", -129),
         Item(Date(2024, 11, 1), job, "笔记本电脑换新用于办公", -4500),
-        Item(Date(2025, 10, 20), life, "视频会员自动续费忘记关", -68)};
+        Item(Date(2019, 3, 15), life, "3月份房租加水电物业费", -2400),
+        Item(Date(2022, 8, 5), job, "8月份正式入职第一份薪水", +12000),
+        Item(Date(2020, 1, 10), job, "1月份实习工资到账", +8000),
+        Item(Date(2025, 10, 20), life, "视频会员自动续费忘记关", -68),
+        Item(Date(2020, 9, 1), study, "研究生新生入学奖学金", +5000),
+        Item(Date(2023, 4, 12), study, "项目结题验收劳务费", +2000),
+        Item(Date(2021, 12, 25), life, "圣诞节请朋友吃火锅", -598)};
 }
 
 /** @brief 获取所有记录
@@ -247,6 +246,23 @@ QString DataManager::statisticsByYear(int startYear, int endYear) const
     return result;
 }
 
+QMap<int, QPair<int, int>> DataManager::getYearStats(int startYear, int endYear) const
+{
+    QMap<int, QPair<int, int>> yearStats;
+    for (const Item &item : m_items)
+    {
+        if (item.date.year >= startYear && item.date.year <= endYear)
+        {
+            int y = item.date.year;
+            if (item.amount >= 0)
+                yearStats[y].first += item.amount;
+            else
+                yearStats[y].second += item.amount;
+        }
+    }
+    return yearStats;
+}
+
 /** @brief 按月份统计
  * @param startYear 起始年份
  * @param startMonth 起始月份
@@ -291,6 +307,26 @@ QString DataManager::statisticsByMonth(int startYear, int startMonth, int endYea
     return result;
 }
 
+QMap<QString, QPair<int, int>> DataManager::getMonthStats(int startYear, int startMonth, int endYear, int endMonth) const
+{
+    QMap<QString, QPair<int, int>> monthStats;
+    for (const Item &item : m_items)
+    {
+        int year = item.date.year;
+        int month = item.date.month;
+        if ((year > startYear || (year == startYear && month >= startMonth)) &&
+            (year < endYear || (year == endYear && month <= endMonth)))
+        {
+            QString key = QString("%1-%2").arg(year).arg(month, 2, 10, QChar('0'));
+            if (item.amount >= 0)
+                monthStats[key].first += item.amount;
+            else
+                monthStats[key].second += item.amount;
+        }
+    }
+    return monthStats;
+}
+
 /** @brief 按类型统计
  * @return 统计结果字符串
  */
@@ -325,19 +361,29 @@ QString DataManager::statisticsByCategory() const
     return result;
 }
 
+QMap<Category, QPair<int, int>> DataManager::getCategoryStats() const
+{
+    QMap<Category, QPair<int, int>> catStats;
+    for (const Item &item : m_items)
+    {
+        if (item.amount >= 0)
+            catStats[item.category].first += item.amount;
+        else
+            catStats[item.category].second += item.amount;
+    }
+    return catStats;
+}
+
 /** @brief 保存数据到文件
  * @param fileName 文件路径
  * @return 是否保存成功
  */
 bool DataManager::saveToFile(const QString &fileName) const
 {
-    qDebug() << "保存记录数量:" << m_items.size();
-    qDebug() << "保存文件路径:" << fileName;
 
     QFile file(fileName);
     if (!file.open(QIODevice::WriteOnly))
     {
-        qDebug() << "文件打开失败!";
         return false;
     }
 
@@ -365,12 +411,10 @@ bool DataManager::saveToFile(const QString &fileName) const
  */
 bool DataManager::loadFromFile(const QString &fileName)
 {
-    qDebug() << "读取文件路径:" << fileName;
 
     QFile file(fileName);
     if (!file.open(QIODevice::ReadOnly))
     {
-        qDebug() << "文件打开失败!";
         return false;
     }
 
@@ -379,7 +423,6 @@ bool DataManager::loadFromFile(const QString &fileName)
 
     int size;
     in >> size;
-    qDebug() << "文件中的记录数量:" << size;
 
     m_items.clear();
     for (int i = 0; i < size; ++i)

@@ -27,6 +27,8 @@
 #include <QGroupBox>
 #include <QMap>
 #include <QTextBrowser>
+#include <QPainter>
+#include <QLabel>
 
 #include "datamanager.h"
 

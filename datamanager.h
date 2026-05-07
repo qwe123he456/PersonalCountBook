@@ -96,19 +96,12 @@ public:
      * @param endYear 结束年份
      * @return 统计结果字符串
      */
-    QString statisticsByYear(int startYear, int endYear) const;
-    /** @brief 按月份统计
-     * @param startYear 起始年份
-     * @param startMonth 起始月份
-     * @param endYear 结束年份
-     * @param endMonth 结束月份
-     * @return 统计结果字符串
-     */
+QString statisticsByYear(int startYear, int endYear) const;
+    QMap<int, QPair<int, int>> getYearStats(int startYear, int endYear) const;
     QString statisticsByMonth(int startYear, int startMonth, int endYear, int endMonth) const;
-    /** @brief 按类型统计
-     * @return 统计结果字符串
-     */
+    QMap<QString, QPair<int, int>> getMonthStats(int startYear, int startMonth, int endYear, int endMonth) const;
     QString statisticsByCategory() const;
+    QMap<Category, QPair<int, int>> getCategoryStats() const;
 
     /** @brief 保存数据到文件
      * @param fileName 文件路径
