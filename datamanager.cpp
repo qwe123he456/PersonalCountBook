@@ -337,7 +337,7 @@ bool DataManager::saveToFile(const QString &fileName) const
     QDataStream out(&file);
     out.setVersion(QDataStream::Qt_5_15);
 
-    out << m_items.size();
+    out << (int)m_items.size();
     for (const Item &item : m_items)
     {
         out << item.date.year;

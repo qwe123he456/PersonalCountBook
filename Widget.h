@@ -41,12 +41,10 @@ public:
     /**
      * @brief 构造函数
      * @param parent 父窗口指针
-     *
      */
     explicit Widget(QWidget *parent = nullptr);
     /**
      * @brief 析构函数
-     *
      */
     ~Widget() override;
 

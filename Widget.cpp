@@ -140,24 +140,24 @@ void Widget::loadDataToTable()
     }
 }
 
-/* ======槽函数实现======
- */
+/* ======槽函数实现====== */
 
 /** @brief 添加记录
  *
  */
 void Widget::onAddClicked()
 {
-    QDate qdate = dateEdit->date();
+    // 获取用户输入
+    QDate qdate = dateEdit->date(); // 获取日期
     Date date(qdate.year(), qdate.month(), qdate.day());
-    Category category = categoryComboBox->currentData().value<Category>();
-    int amount = amountSpinBox->value();
-    QString desc = descLineEdit->text();
+    Category category = categoryComboBox->currentData().value<Category>(); // 获取类别
+    int amount = amountSpinBox->value();                                   // 获取金额
+    QString desc = descLineEdit->text();                                   // 获取明细
 
     Item newItem(date, category, desc, amount);
     m_dataManager->addItem(newItem); // 数组操作：添加新账目到列表中
     loadDataToTable();
-
+    // 重置输入框
     descLineEdit->clear();
     amountSpinBox->setValue(0);
 }
@@ -370,7 +370,7 @@ void Widget::onStatisticsClicked()
 
     QFormLayout *form = new QFormLayout();
 
-    QDateEdit *startDate = new QDateEdit(QDate(2024, 1, 1), &dialog);
+    QDateEdit *startDate = new QDateEdit(QDate(2019, 1, 1), &dialog);
     startDate->setCalendarPopup(true);
     form->addRow("开始日期:", startDate);
 
