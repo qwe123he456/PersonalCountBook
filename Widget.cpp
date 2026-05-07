@@ -340,69 +340,19 @@ void Widget::onDeleteClicked()
 /* ---- 修改记录 ---- */
 void Widget::onModifyClicked()
 {
-    // 第一步：查找要修改的记录
-    bool ok;
-    QString keyword = QInputDialog::getText(this, "查找", "请输入要修改的记录关键字(明细/金额):",
-                                            QLineEdit::Normal, "", &ok);
-    if (!ok || keyword.isEmpty())
-        return; // 用户取消或输入为空
+    // 获取当前选中的行
+    int currentRow = tableWidget->currentRow();
 
-    // 在itemList中查找匹配关键字的记录
-    QVector<int> matchedIndices; // 存储匹配记录的索引
-    for (int i = 0; i < itemList.size(); ++i)
+    if (currentRow < 0)
     {
-        const Item &item = itemList[i];
-        // 匹配条件：明细包含关键字 或 金额包含关键字
-        if (item.desc.contains(keyword) || QString::number(item.amount).contains(keyword))
-        {
-            matchedIndices.append(i);
-        }
-    }
-
-    // 处理查找结果
-    if (matchedIndices.isEmpty())
-    {
-        QMessageBox::information(this, "查找结果", "未找到匹配的记录!");
+        QMessageBox::warning(this, "警告", "请先选择要修改的记录!");
         return;
     }
 
-    // 决定最终要修改的记录索引
-    int targetIndex;
-    if (matchedIndices.size() == 1)
-    {
-        // 只找到一条，直接使用
-        targetIndex = matchedIndices[0];
-    }
-    else
-    {
-        // 找到多条，让用户选择具体哪一条
-        QStringList items;
-        for (int idx : matchedIndices)
-        {
-            const Item &item = itemList[idx];
-            // 构建显示字符串，便于用户识别
-            items.append(QString("%1: %2-%3-%4 %5 %6 %7")
-                             .arg(idx + 1)
-                             .arg(item.date.year)
-                             .arg(item.date.month)
-                             .arg(item.date.day)
-                             .arg(categoryToDisplayString(item.category))
-                             .arg(formatAmount(item.amount))
-                             .arg(item.desc));
-        }
+    // 获取要修改的记录
+    int targetIndex = currentRow;
 
-        // 弹出下拉框让用户选择
-        bool okSelect;
-        QString selected = QInputDialog::getItem(this, "选择", "找到多条记录，请选择要修改的记录序号:",
-                                                 items, 0, false, &okSelect);
-        if (!okSelect)
-            return; // 用户取消
-
-        // 获取用户选择的索引
-        targetIndex = matchedIndices[items.indexOf(selected)];
-    }
-
-    // 第二步：弹出修改对话框
+    // 弹出修改对话框
     Item &item = itemList[targetIndex]; // 获取要修改的记录的引用
 
     // 创建对话框
