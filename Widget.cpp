@@ -6,8 +6,8 @@
 /* 全局变量：存储所有帐务记录的列表 */
 /* 全局变量：存储所有帐务记录的列表 */
 QVector<Item> itemList = {
-    Item(Date(2024, 3, 21), study, "学习", 20),
-    Item(Date(2022, 8, 12), life, "生活", -30),
+    Item(Date(2024, 3, 21), study, "", 20),
+    Item(Date(2022, 8, 12), life, "", -30),
 };
 
 /* ============================================================
@@ -107,13 +107,13 @@ void Widget::setupUI()
 
     /* ---- 表格控件 ---- */
     tableWidget = new QTableWidget(this);
-tableWidget->setColumnCount(5);  // 设置5列
+    tableWidget->setColumnCount(5); // 设置5列
     // 设置表头标签：序号、日期、类型、金额、明细
     tableWidget->setHorizontalHeaderLabels(QStringList() << "序号"
-                                                       << "日期"
-                                                       << "类型"
-                                                       << "金额"
-                                                       << "明细");
+                                                         << "日期"
+                                                         << "类型"
+                                                         << "金额"
+                                                         << "明细");
     tableWidget->horizontalHeader()->setStretchLastSection(true);     // 最后一列自动拉伸
     tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows); // 整行选中
     tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);  // 禁止编辑
@@ -130,9 +130,9 @@ tableWidget->setColumnCount(5);  // 设置5列
 
     // 类型下拉框（学习、生活、工作）
     categoryComboBox = new QComboBox(this);
-    categoryComboBox->addItem("学习(study)", QVariant((int)study));
-    categoryComboBox->addItem("生活(life)", QVariant((int)life));
-    categoryComboBox->addItem("工作(job)", QVariant((int)job));
+    categoryComboBox->addItem("学习", study);
+    categoryComboBox->addItem("生活", life);
+    categoryComboBox->addItem("工作", job);
     inputLayout->addRow("类型:", categoryComboBox);
 
     // 金额输入框（支持负数）
@@ -399,9 +399,9 @@ void Widget::onModifyClicked()
 
     // 类型下拉框
     QComboBox *editCategory = new QComboBox(&dialog);
-    editCategory->addItem("学习(study)", QVariant((int)study));
-    editCategory->addItem("生活(life)", QVariant((int)life));
-    editCategory->addItem("工作(job)", QVariant((int)job));
+    editCategory->addItem("学习(study)", study);
+    editCategory->addItem("生活(life)", life);
+    editCategory->addItem("工作(job)", job);
     editCategory->setCurrentIndex((int)item.category); // 设置当前值
     form->addRow("类型:", editCategory);
 
@@ -452,6 +452,7 @@ void Widget::onSearchClicked()
     // 创建查找对话框
     QDialog dialog(this);
     dialog.setWindowTitle("查找帐务数据");
+    dialog.resize(600, 450);  // 设置默认宽度
     QVBoxLayout *layout = new QVBoxLayout(&dialog);
 
     // 表单布局
@@ -500,36 +501,26 @@ void Widget::onSearchClicked()
             bool matched = false;
 
             // 根据查找方式进行匹配
-            if (type == 0)  // 按日期查找
+            if (type == 0)  // 按日期查找（模糊匹配）
             {
-                // 支持多种格式：完整日期(2024-03-21)、年(2024)、年-月(2024-03)
-                if (keyword.contains("-"))
-                {
-                    QStringList parts = keyword.split("-");
-                    if (parts.size() >= 1 && parts[0].toInt() > 0)
-                        matched = item.date.year == parts[0].toInt();
-                    if (matched && parts.size() >= 2 && parts[1].toInt() > 0)
-                        matched = item.date.month == parts[1].toInt();
-                    if (matched && parts.size() >= 3 && parts[2].toInt() > 0)
-                        matched = item.date.day == parts[2].toInt();
-                }
-                else if (!keyword.isEmpty())
-                {
-                    int year = keyword.toInt();
-                    if (year > 0 && year == item.date.year)
-                        matched = true;
-                }
+                // 将日期转换为字符串后进行模糊匹配
+                QString dateStr = QString("%1-%2-%3")
+                                      .arg(item.date.year)
+                                      .arg(item.date.month, 2, 10, QChar('0'))
+                                      .arg(item.date.day, 2, 10, QChar('0'));
+                matched = dateStr.contains(keyword);
             }
             else if (type == 1)  // 按明细查找（模糊匹配）
             {
                 matched = item.desc.contains(keyword);
             }
-            else if (type == 2)  // 按类型查找
+            else if (type == 2)  // 按类型查找（模糊匹配，支持中文或英文）
             {
-                QString catStr = categoryToString(item.category);
-                matched = catStr.contains(keyword);
+                QString catStr = categoryToDisplayString(item.category);  // 中文：学习、生活、工作
+                QString catStrEn = categoryToString(item.category);       // 英文：study、life、job
+                matched = catStr.contains(keyword) || catStrEn.contains(keyword);
             }
-            else if (type == 3)  // 按金额查找
+            else if (type == 3)  // 按金额查找（模糊匹配）
             {
                 matched = QString::number(item.amount).contains(keyword);
             }
