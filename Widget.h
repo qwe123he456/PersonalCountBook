@@ -43,7 +43,6 @@ private:
     QAction *saveAction;
     QAction *loadAction;
     QToolBar *toolBar;
-    QAction *addAction;
     QAction *deleteAction;
     QAction *modifyAction;
     QAction *searchAction;

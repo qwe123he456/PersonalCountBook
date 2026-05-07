@@ -15,10 +15,7 @@ Widget::Widget(QWidget *parent)
 
 Widget::~Widget() = default;
 
-/* -----------------------------------------------------------
- * 函数: setupUI
- * 作用: 初始化所有UI组件
- * ----------------------------------------------------------- */
+/* 初始化所有UI组件 */
 void Widget::setupUI()
 {
     resize(900, 650);
@@ -38,13 +35,11 @@ void Widget::setupUI()
 
     toolBar = new QToolBar(this);
     toolBar->setMovable(false);
-    addAction = new QAction("新增", this);
     deleteAction = new QAction("删除", this);
     modifyAction = new QAction("修改", this);
     searchAction = new QAction("查找", this);
     sortAction = new QAction("排序", this);
     statisticsAction = new QAction("统计", this);
-    toolBar->addAction(addAction);
     toolBar->addAction(deleteAction);
     toolBar->addAction(modifyAction);
     toolBar->addAction(searchAction);
@@ -101,10 +96,7 @@ void Widget::setupUI()
     connect(loadAction, &QAction::triggered, this, &Widget::onLoadClicked);
 }
 
-/* -----------------------------------------------------------
- * 函数: loadDataToTable
- * 作用: 将数据加载到表格控件中显示
- * ----------------------------------------------------------- */
+/* 刷新显示表格数据 */
 void Widget::loadDataToTable()
 {
     const QVector<Item> &items = m_dataManager->getItems();
@@ -137,9 +129,7 @@ void Widget::loadDataToTable()
     }
 }
 
-/* ============================================================
- * 槽函数实现
- * ============================================================ */
+/* ======槽函数实现====== */
 
 /* ---- 新增记录 ---- */
 void Widget::onAddClicked()
