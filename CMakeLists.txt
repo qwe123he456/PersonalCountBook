@@ -9,7 +9,9 @@ qt_add_executable(PersonalCountBook
     WIN32 MACOSX_BUNDLE
     main.cpp
     Widget.cpp
-    Widget.h
+    date.cpp
+    item.cpp
+    datamanager.cpp
 )
 
 target_link_libraries(PersonalCountBook

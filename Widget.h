@@ -14,7 +14,6 @@
 #include <QComboBox>
 #include <QDateEdit>
 #include <QPushButton>
-#include <QLabel>
 #include <QDialog>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -26,36 +25,7 @@
 #include <QMap>
 #include <QTextBrowser>
 
-enum Category
-{
-    study,
-    life,
-    job
-};
-
-class Date
-{
-public:
-    int year;
-    int month;
-    int day;
-    Date(int year = 1, int month = 1, int day = 1);
-    bool operator<(const Date &other) const;
-    bool operator==(const Date &other) const;
-};
-
-class Item
-{
-public:
-    Date date;
-    Category category;
-    QString desc;
-    int amount;
-    int index;
-    Item(Date date = Date(), Category category = study, QString desc = "", int amount = 0);
-};
-
-extern QVector<Item> itemList;
+#include "datamanager.h"
 
 class Widget : public QWidget
 {
@@ -66,6 +36,8 @@ public:
     ~Widget() override;
 
 private:
+    DataManager *m_dataManager;
+
     QMenuBar *menuBar;
     QMenu *fileMenu;
     QAction *saveAction;
@@ -87,12 +59,6 @@ private:
 
     void setupUI();
     void loadDataToTable();
-    void updateTableIndex();
-
-    QString categoryToString(Category cat);
-    Category stringToCategory(const QString &str);
-    QString categoryToDisplayString(Category cat);
-    QString formatAmount(int amount);
 
 private slots:
     void onAddClicked();
