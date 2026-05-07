@@ -92,6 +92,7 @@ private:
     QString categoryToString(Category cat);
     Category stringToCategory(const QString &str);
     QString categoryToDisplayString(Category cat);
+    QString formatAmount(int amount);
 
 private slots:
     void onAddClicked();

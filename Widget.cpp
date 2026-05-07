@@ -6,7 +6,7 @@
 /* 全局变量：存储所有帐务记录的列表 */
 /* 全局变量：存储所有帐务记录的列表 */
 QVector<Item> itemList = {
-    Item(Date(2024, 3, 21), study, "", 20),
+    Item(Date(2020, 3, 21), study, "", 20),
     Item(Date(2022, 8, 12), life, "", -30),
 };
 
@@ -209,6 +209,17 @@ QString Widget::categoryToDisplayString(Category cat)
 }
 
 /* -----------------------------------------------------------
+ * 函数: formatAmount
+ * 作用: 格式化金额显示，正数加+号，负数不变
+ * ----------------------------------------------------------- */
+QString Widget::formatAmount(int amount)
+{
+    if (amount > 0)
+        return QString("+%1").arg(amount);
+    return QString::number(amount);
+}
+
+/* -----------------------------------------------------------
  * 函数: loadDataToTable
  * 作用: 将itemList中的所有记录加载到表格控件中显示
  *       每次数据发生改变（增/删/改/读）后都需要调用此函数
@@ -223,19 +234,30 @@ void Widget::loadDataToTable()
     {
         const Item &item = itemList[i];
 
-        // 第0列：序号（从1开始）
-        tableWidget->setItem(i, 0, new QTableWidgetItem(QString::number(i + 1)));
+        // 第0列：序号（从1开始，居中）
+        QTableWidgetItem *item0 = new QTableWidgetItem(QString::number(i + 1));
+        item0->setTextAlignment(Qt::AlignCenter);
+        tableWidget->setItem(i, 0, item0);
 
-        // 第1列：日期（格式：YYYY-MM-DD，不足两位补0）
-        tableWidget->setItem(i, 1, new QTableWidgetItem(QString("%1-%2-%3").arg(item.date.year).arg(item.date.month, 2, 10, QChar('0')).arg(item.date.day, 2, 10, QChar('0'))));
+        // 第1列：日期（格式：YYYY-MM-DD，居中）
+        QTableWidgetItem *item1 = new QTableWidgetItem(QString("%1-%2-%3").arg(item.date.year).arg(item.date.month, 2, 10, QChar('0')).arg(item.date.day, 2, 10, QChar('0')));
+        item1->setTextAlignment(Qt::AlignCenter);
+        tableWidget->setItem(i, 1, item1);
 
-        // 第2列：类型（中文显示）
-        tableWidget->setItem(i, 2, new QTableWidgetItem(categoryToDisplayString(item.category)));
+        // 第2列：类型（中文显示，居中）
+        QTableWidgetItem *item2 = new QTableWidgetItem(categoryToDisplayString(item.category));
+        item2->setTextAlignment(Qt::AlignCenter);
+        tableWidget->setItem(i, 2, item2);
 
-        // 第3列：金额
-        tableWidget->setItem(i, 3, new QTableWidgetItem(QString::number(item.amount)));
+        // 第3列：金额（靠右对齐）
+        QTableWidgetItem *item3 = new QTableWidgetItem(formatAmount(item.amount));
+        item3->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+        tableWidget->setItem(i, 3, item3);
 
-        // 第4列：明细
+        // 第4列：明细（居中）
+        QTableWidgetItem *item4 = new QTableWidgetItem(item.desc);
+        item4->setTextAlignment(Qt::AlignCenter);
+        tableWidget->setItem(i, 4, item4);
         tableWidget->setItem(i, 4, new QTableWidgetItem(item.desc));
     }
 }
@@ -307,13 +329,12 @@ void Widget::onDeleteClicked()
     {
         // 从列表中移除指定位置的记录
         itemList.removeAt(currentRow);
-
-        // 刷新表格显示
-        loadDataToTable();
-
-        // 更新序号（因为删除后索引变化了）
-        updateTableIndex();
     }
+    // 刷新表格显示
+    loadDataToTable();
+
+    // 更新序号（因为删除后索引变化了）
+    updateTableIndex();
 }
 
 /* ---- 修改记录 ---- */
@@ -366,7 +387,7 @@ void Widget::onModifyClicked()
                              .arg(item.date.month)
                              .arg(item.date.day)
                              .arg(categoryToDisplayString(item.category))
-                             .arg(item.amount)
+                             .arg(formatAmount(item.amount))
                              .arg(item.desc));
         }
 
@@ -452,7 +473,7 @@ void Widget::onSearchClicked()
     // 创建查找对话框
     QDialog dialog(this);
     dialog.setWindowTitle("查找帐务数据");
-    dialog.resize(600, 450);  // 设置默认宽度
+    dialog.resize(600, 450); // 设置默认宽度
     QVBoxLayout *layout = new QVBoxLayout(&dialog);
 
     // 表单布局
@@ -540,13 +561,13 @@ void Widget::onSearchClicked()
             for (int idx : matchedIndices)
             {
                 const Item &item = itemList[idx];
-                result += QString("序号:%1 日期:%2-%3-%4 类型:%5 金额:%6 明细:%7\n")
+                result += QString("序号:%1    日期:%2-%3-%4    类型:%5    金额:%6    明细:%7\n")
                               .arg(idx + 1)
                               .arg(item.date.year)
                               .arg(item.date.month, 2, 10, QChar('0'))
                               .arg(item.date.day, 2, 10, QChar('0'))
                               .arg(categoryToDisplayString(item.category))
-                              .arg(item.amount)
+                              .arg(formatAmount(item.amount))
                               .arg(item.desc);
             }
             resultBrowser->setText(result);
@@ -629,14 +650,14 @@ void Widget::onStatisticsClicked()
     // 创建统计对话框
     QDialog dialog(this);
     dialog.setWindowTitle("帐务统计");
-    dialog.resize(500, 400);
+    dialog.resize(600, 450); // 设置默认宽度
     QVBoxLayout *layout = new QVBoxLayout(&dialog);
 
     // 设置日期范围和统计方式
     QFormLayout *form = new QFormLayout();
 
-    // 开始日期（默认为2024年1月1日）
-    QDateEdit *startDate = new QDateEdit(QDate(2024, 1, 1), &dialog);
+    // 开始日期（默认为2020年1月1日）
+    QDateEdit *startDate = new QDateEdit(QDate(2020, 1, 1), &dialog);
     startDate->setCalendarPopup(true);
     form->addRow("开始日期:", startDate);
 
@@ -701,16 +722,16 @@ void Widget::onStatisticsClicked()
             {
                 result += QString("年份: %1\n  收入: %2\n  支出: %3\n  结余: %4\n\n")
                               .arg(it.key())
-                              .arg(it.value().first)
-                              .arg(it.value().second)
-                              .arg(it.value().first + it.value().second);
+                              .arg(formatAmount(it.value().first))
+                              .arg(formatAmount(it.value().second))
+                              .arg(formatAmount(it.value().first + it.value().second));
                 totalIncome += it.value().first;
                 totalExpense += it.value().second;
             }
             result += QString("总计:\n  收入: %1\n  支出: %2\n  结余: %3")
-                          .arg(totalIncome)
-                          .arg(totalExpense)
-                          .arg(totalIncome + totalExpense);
+                          .arg(formatAmount(totalIncome))
+                          .arg(formatAmount(totalExpense))
+                          .arg(formatAmount(totalIncome + totalExpense));
         }
         /* ---- 按月统计 ---- */
         else if (type == 1)
@@ -733,16 +754,16 @@ void Widget::onStatisticsClicked()
             {
                 result += QString("月份: %1\n  收入: %2\n  支出: %3\n  结余: %4\n\n")
                               .arg(it.key())
-                              .arg(it.value().first)
-                              .arg(it.value().second)
-                              .arg(it.value().first + it.value().second);
+                              .arg(formatAmount(it.value().first))
+                              .arg(formatAmount(it.value().second))
+                              .arg(formatAmount(it.value().first + it.value().second));
                 totalIncome += it.value().first;
                 totalExpense += it.value().second;
             }
             result += QString("总计:\n  收入: %1\n  支出: %2\n  结余: %3")
-                          .arg(totalIncome)
-                          .arg(totalExpense)
-                          .arg(totalIncome + totalExpense);
+                          .arg(formatAmount(totalIncome))
+                          .arg(formatAmount(totalExpense))
+                          .arg(formatAmount(totalIncome + totalExpense));
         }
         /* ---- 按类型统计 ---- */
         else
@@ -871,5 +892,5 @@ void Widget::onLoadClicked()
     loadDataToTable();
 
     // 提示读取成功
-    QMessageBox::information(this, "读取", "数据读取成功!");
+    // QMessageBox::information(this, "读取", "数据读取成功!");
 }
