@@ -774,7 +774,7 @@ void Widget::onSaveClicked()
     out.setVersion(QDataStream::Qt_5_15); // 设置版本，确保兼容性
 
     // 首先写入记录数量
-    out << itemList.size();
+    out << (int)itemList.size();
 
     // 依次写入每条记录的数据
     for (const Item &item : itemList)
