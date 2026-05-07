@@ -9,7 +9,7 @@
 #include <QDebug>
 
 /** @brief 构造函数
- * @return
+ *
  */
 DataManager::DataManager()
 {
@@ -30,7 +30,7 @@ const QVector<Item> &DataManager::getItems() const
 
 /** @brief 添加记录
  * @param item 要添加的记录
- * @return
+ *
  */
 void DataManager::addItem(const Item &item)
 {
@@ -39,7 +39,7 @@ void DataManager::addItem(const Item &item)
 
 /** @brief 删除记录
  * @param index 要删除的记录索引
- * @return
+ *
  */
 void DataManager::deleteItem(int index)
 {
@@ -52,7 +52,7 @@ void DataManager::deleteItem(int index)
 /** @brief 修改记录
  * @param index 要修改的记录索引
  * @param item 修改后的记录内容
- * @return
+ *
  */
 void DataManager::modifyItem(int index, const Item &item)
 {
@@ -138,7 +138,7 @@ QVector<int> DataManager::searchByAmount(const QString &keyword) const
 }
 
 /** @brief 按日期升序排序
- * @return
+ *
  */
 void DataManager::sortByDateAsc()
 {
@@ -152,7 +152,7 @@ void DataManager::sortByDateAsc()
 }
 
 /** @brief 按日期降序排序
- * @return
+ *
  */
 void DataManager::sortByDateDesc()
 {
@@ -166,7 +166,7 @@ void DataManager::sortByDateDesc()
 }
 
 /** @brief 按金额升序排序
- * @return
+ *
  */
 void DataManager::sortByAmountAsc()
 {
@@ -175,7 +175,7 @@ void DataManager::sortByAmountAsc()
 }
 
 /** @brief 按金额降序排序
- * @return
+ *
  */
 void DataManager::sortByAmountDesc()
 {
@@ -184,7 +184,7 @@ void DataManager::sortByAmountDesc()
 }
 
 /** @brief 按明细升序排序
- * @return
+ *
  */
 void DataManager::sortByDescAsc()
 {
@@ -193,7 +193,7 @@ void DataManager::sortByDescAsc()
 }
 
 /** @brief 按明细降序排序
- * @return
+ *
  */
 void DataManager::sortByDescDesc()
 {
@@ -381,10 +381,6 @@ bool DataManager::loadFromFile(const QString &fileName)
         QString desc;
 
         in >> year >> month >> day >> category >> desc >> amount;
-
-        qDebug() << "读取记录" << (i + 1)
-                 << "日期:" << year << "-" << month << "-" << day
-                 << "类型:" << category << "金额:" << amount << "明细:" << desc;
 
         Date date(year, month, day);
         Item item(date, (Category)category, desc, amount);

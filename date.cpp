@@ -7,7 +7,7 @@
  * @param year 年
  * @param month 月
  * @param day 日
- * @return
+ *
  */
 Date::Date(int year, int month, int day)
     : year(year), month(month), day(day) {}

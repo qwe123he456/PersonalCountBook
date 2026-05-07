@@ -28,6 +28,7 @@ void Widget::setupUI()
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(0, 0, 0, 0);
 
+    // 菜单栏：文件(F)按钮
     menuBar = new QMenuBar(this);
     fileMenu = new QMenu("文件(&F)", this);
     saveAction = new QAction("保存(&S)", this);
@@ -37,6 +38,7 @@ void Widget::setupUI()
     menuBar->addMenu(fileMenu);
     mainLayout->addWidget(menuBar);
 
+    // 工具栏
     toolBar = new QToolBar(this);
     toolBar->setMovable(false);
     deleteAction = new QAction("删除", this);
@@ -51,6 +53,7 @@ void Widget::setupUI()
     toolBar->addAction(statisticsAction);
     mainLayout->addWidget(toolBar);
 
+    // 数据显示区表格
     tableWidget = new QTableWidget(this);
     tableWidget->setColumnCount(5);
     tableWidget->setHorizontalHeaderLabels(QStringList() << "序号"
@@ -63,6 +66,7 @@ void Widget::setupUI()
     tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
     mainLayout->addWidget(tableWidget, 1);
 
+    // 数据添加区
     QGroupBox *inputGroup = new QGroupBox("添加新记录", this);
     QFormLayout *inputLayout = new QFormLayout();
 
@@ -90,6 +94,7 @@ void Widget::setupUI()
     inputGroup->setLayout(inputLayout);
     mainLayout->addWidget(inputGroup);
 
+    // 绑定按钮与点击事件
     connect(addButton, &QPushButton::clicked, this, &Widget::onAddClicked);
     connect(deleteAction, &QAction::triggered, this, &Widget::onDeleteClicked);
     connect(modifyAction, &QAction::triggered, this, &Widget::onModifyClicked);
@@ -138,7 +143,7 @@ void Widget::loadDataToTable()
 /* ======槽函数实现======
  */
 
-/** @brief 新增记录
+/** @brief 添加记录
  *
  */
 void Widget::onAddClicked()
@@ -150,7 +155,7 @@ void Widget::onAddClicked()
     QString desc = descLineEdit->text();
 
     Item newItem(date, category, desc, amount);
-    m_dataManager->addItem(newItem);
+    m_dataManager->addItem(newItem); // 数组操作：添加新账目到列表中
     loadDataToTable();
 
     descLineEdit->clear();
@@ -162,7 +167,7 @@ void Widget::onAddClicked()
  */
 void Widget::onDeleteClicked()
 {
-    int currentRow = tableWidget->currentRow();
+    int currentRow = tableWidget->currentRow(); // 光标所在的账目
     if (currentRow < 0)
     {
         QMessageBox::warning(this, "警告", "请先选择要删除的记录!");
@@ -185,14 +190,14 @@ void Widget::onDeleteClicked()
  */
 void Widget::onModifyClicked()
 {
-    int currentRow = tableWidget->currentRow();
+    int currentRow = tableWidget->currentRow(); // 光标所在的账目
     if (currentRow < 0)
     {
         QMessageBox::warning(this, "警告", "请先选择要修改的记录!");
         return;
     }
 
-    const Item &item = m_dataManager->getItems()[currentRow];
+    const Item &item = m_dataManager->getItems()[currentRow]; // 通过引用对账目产生影响
 
     QDialog dialog(this);
     dialog.setWindowTitle("修改记录");
@@ -251,7 +256,7 @@ void Widget::onModifyClicked()
 void Widget::onSearchClicked()
 {
     QDialog dialog(this);
-    dialog.setWindowTitle("查找帐务数据");
+    dialog.setWindowTitle("查找账务数据");
     dialog.resize(600, 450);
     QVBoxLayout *layout = new QVBoxLayout(&dialog);
 
@@ -359,8 +364,8 @@ void Widget::onSortClicked()
 void Widget::onStatisticsClicked()
 {
     QDialog dialog(this);
-    dialog.setWindowTitle("帐务统计");
-    dialog.resize(500, 400);
+    dialog.setWindowTitle("账务统计");
+    dialog.resize(600, 450);
     QVBoxLayout *layout = new QVBoxLayout(&dialog);
 
     QFormLayout *form = new QFormLayout();

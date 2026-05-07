@@ -4,8 +4,7 @@
 /** @file 日期Date类的定义
  */
 
-/**
- * @brief 日期类
+/** @brief 日期类
  *
  */
 class Date
@@ -20,7 +19,7 @@ public:
      * @param year 年
      * @param month 月
      * @param day 日
-     * @return
+     *
      */
     Date(int year = 1, int month = 1, int day = 1);
 

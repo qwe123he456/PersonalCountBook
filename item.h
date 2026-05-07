@@ -7,8 +7,7 @@
 /** @file 记录Item类的定义
  */
 
-/**
- * @brief 记录类型枚举
+/** @brief 记录类型枚举
  *
  */
 enum Category
@@ -18,8 +17,7 @@ enum Category
     job
 };
 
-/**
- * @brief 记录类
+/** @brief 记录类
  *
  */
 class Item
@@ -37,7 +35,7 @@ public:
      * @param category 类型
      * @param desc 明细
      * @param amount 金额
-     * @return
+     *
      */
     Item(Date date = Date(), Category category = study, QString desc = "", int amount = 0);
 };
