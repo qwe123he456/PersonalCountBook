@@ -58,6 +58,7 @@ private:
     QAction *saveAction;
     QAction *loadAction;
     QToolBar *toolBar;
+    QAction *addAction;
     QAction *deleteAction;
     QAction *modifyAction;
     QAction *searchAction;
@@ -76,6 +77,7 @@ private:
     QLineEdit *keywordEdit;
     QPushButton *searchBtn;
     QPushButton *closeSearchBtn;
+    QPushButton *closeAddBtn;
     bool isSearchMode;
     int currentSearchType;
     QString currentKeyword;

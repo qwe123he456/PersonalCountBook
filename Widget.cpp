@@ -42,11 +42,13 @@ void Widget::setupUI()
     // 工具栏
     toolBar = new QToolBar(this);
     toolBar->setMovable(false);
+    addAction = new QAction("添加", this);
     deleteAction = new QAction("删除", this);
     modifyAction = new QAction("修改", this);
     searchAction = new QAction("查找", this);
     sortAction = new QAction("排序", this);
     statisticsAction = new QAction("统计", this);
+    toolBar->addAction(addAction);
     toolBar->addAction(deleteAction);
     toolBar->addAction(modifyAction);
     toolBar->addAction(searchAction);
@@ -90,9 +92,14 @@ void Widget::setupUI()
     inputLayout->addRow("明细:", descLineEdit);
 
     addButton = new QPushButton("添加记录", this);
-    inputLayout->addRow("", addButton);
+    closeAddBtn = new QPushButton("关闭", this);
+    QHBoxLayout *addBtnLayout = new QHBoxLayout();
+    addBtnLayout->addWidget(addButton);
+    addBtnLayout->addWidget(closeAddBtn);
+    inputLayout->addRow("", addBtnLayout);
 
     inputGroup->setLayout(inputLayout);
+    inputGroup->hide();
     mainLayout->addWidget(inputGroup);
 
     // 查找数据区
@@ -123,9 +130,36 @@ void Widget::setupUI()
 
     // 绑定按钮与点击事件
     connect(addButton, &QPushButton::clicked, this, &Widget::onAddClicked);
-    connect(deleteAction, &QAction::triggered, this, &Widget::onDeleteClicked);
+connect(addAction, &QAction::triggered, this, [&]()
+            {
+        if (inputGroup->isVisible())
+        {
+            inputGroup->hide();
+        }
+        else
+        {
+            inputGroup->show();
+        }
+    });
+    connect(closeAddBtn, &QPushButton::clicked, this, [&]()
+            {
+        inputGroup->hide();
+    });
+connect(deleteAction, &QAction::triggered, this, &Widget::onDeleteClicked);
     connect(modifyAction, &QAction::triggered, this, &Widget::onModifyClicked);
-    connect(searchAction, &QAction::triggered, this, &Widget::onSearchClicked);
+    connect(searchAction, &QAction::triggered, this, [&]()
+            {
+        if (searchGroup->isVisible())
+        {
+            isSearchMode = false;
+            searchGroup->hide();
+            loadDataToTable();
+        }
+        else
+        {
+            onSearchClicked();
+        }
+    });
     connect(sortAction, &QAction::triggered, this, &Widget::onSortClicked);
     connect(statisticsAction, &QAction::triggered, this, &Widget::onStatisticsClicked);
     connect(saveAction, &QAction::triggered, this, &Widget::onSaveClicked);
@@ -356,7 +390,6 @@ void Widget::onSearchClicked()
     isSearchMode = true;
     currentSearchType = searchType->currentIndex();
     currentKeyword = keywordEdit->text();
-    inputGroup->hide();
     searchGroup->show();
 
     loadSearchResults();
@@ -371,7 +404,6 @@ void Widget::onSearchClicked()
             {
         isSearchMode = false;
         searchGroup->hide();
-        inputGroup->show();
         loadDataToTable(); });
 }
 
