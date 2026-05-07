@@ -68,17 +68,24 @@ private:
     QSpinBox *amountSpinBox;
     QLineEdit *descLineEdit;
     QPushButton *addButton;
+    QGroupBox *inputGroup;
+    QGroupBox *searchGroup;
+    QComboBox *searchType;
+    QLineEdit *keywordEdit;
+    QPushButton *searchBtn;
+    QPushButton *closeSearchBtn;
+    bool isSearchMode;
+    int currentSearchType;
+    QString currentKeyword;
+    QVector<Item> backupItems;
 
     /**
      * @brief 初始化所有UI组件
      *
      */
-    void setupUI();
-    /**
-     * @brief 刷新显示表格数据
-     *
-     */
+void setupUI();
     void loadDataToTable();
+    void loadSearchResults();
 
 private slots:
     /**

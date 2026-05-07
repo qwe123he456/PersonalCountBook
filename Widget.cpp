@@ -67,7 +67,7 @@ void Widget::setupUI()
     mainLayout->addWidget(tableWidget, 1);
 
     // 数据添加区
-    QGroupBox *inputGroup = new QGroupBox("添加新记录", this);
+    inputGroup = new QGroupBox("添加新记录", this);
     QFormLayout *inputLayout = new QFormLayout();
 
     dateEdit = new QDateEdit(QDate::currentDate(), this);
@@ -93,6 +93,32 @@ void Widget::setupUI()
 
     inputGroup->setLayout(inputLayout);
     mainLayout->addWidget(inputGroup);
+
+    // 查找数据区
+    searchGroup = new QGroupBox("查找账务数据", this);
+    QFormLayout *searchLayout = new QFormLayout();
+
+    searchType = new QComboBox(this);
+    searchType->addItem("按日期");
+    searchType->addItem("按明细");
+    searchType->addItem("按类型");
+    searchType->addItem("按金额");
+    searchLayout->addRow("查找方式:", searchType);
+
+    keywordEdit = new QLineEdit(this);
+    searchLayout->addRow("关键字:", keywordEdit);
+
+    searchBtn = new QPushButton("查找", this);
+    closeSearchBtn = new QPushButton("关闭", this);
+    QHBoxLayout *searchBtnLayout = new QHBoxLayout();
+    searchBtnLayout->addWidget(searchBtn);
+    searchBtnLayout->addWidget(closeSearchBtn);
+    searchLayout->addRow("", searchBtnLayout);
+
+    searchGroup->setLayout(searchLayout);
+    searchGroup->hide();
+
+    mainLayout->addWidget(searchGroup);
 
     // 绑定按钮与点击事件
     connect(addButton, &QPushButton::clicked, this, &Widget::onAddClicked);
@@ -174,14 +200,23 @@ void Widget::onDeleteClicked()
         return;
     }
 
+    int originalIndex = isSearchMode ? tableWidget->item(currentRow, 0)->text().toInt() - 1 : currentRow;
+
     QMessageBox::StandardButton reply = QMessageBox::question(
         this, "确认", "确定要删除选中的记录吗?",
         QMessageBox::Yes | QMessageBox::No);
 
     if (reply == QMessageBox::Yes)
     {
-        m_dataManager->deleteItem(currentRow);
-        loadDataToTable();
+        m_dataManager->deleteItem(originalIndex);
+        if (isSearchMode)
+        {
+            loadSearchResults();
+        }
+        else
+        {
+            loadDataToTable();
+        }
     }
 }
 
@@ -197,7 +232,9 @@ void Widget::onModifyClicked()
         return;
     }
 
-    const Item &item = m_dataManager->getItems()[currentRow]; // 通过引用对账目产生影响
+    int originalIndex = isSearchMode ? tableWidget->item(currentRow, 0)->text().toInt() - 1 : currentRow;
+
+    const Item &item = m_dataManager->getItems()[originalIndex]; // 通过引用对账目产生影响
 
     QDialog dialog(this);
     dialog.setWindowTitle("修改记录");
@@ -245,8 +282,67 @@ void Widget::onModifyClicked()
         QString newDesc = editDesc->text();
 
         Item modifiedItem(newDate, newCategory, newDesc, newAmount);
-        m_dataManager->modifyItem(currentRow, modifiedItem);
-        loadDataToTable();
+        m_dataManager->modifyItem(originalIndex, modifiedItem);
+        if (isSearchMode)
+        {
+            loadSearchResults();
+        }
+        else
+        {
+            loadDataToTable();
+        }
+    }
+}
+
+/** @brief 加载搜索结果
+ *
+ */
+void Widget::loadSearchResults()
+{
+    QString keyword = currentKeyword;
+    QVector<int> results;
+    if (currentSearchType == 0)
+        results = m_dataManager->searchByDate(keyword);
+    else if (currentSearchType == 1)
+        results = m_dataManager->searchByDesc(keyword);
+    else if (currentSearchType == 2)
+        results = m_dataManager->searchByCategory(keyword);
+    else
+        results = m_dataManager->searchByAmount(keyword);
+
+    if (results.isEmpty())
+    {
+        tableWidget->setRowCount(0);
+    }
+    else
+    {
+        tableWidget->setRowCount(results.size());
+        for (int i = 0; i < results.size(); ++i)
+        {
+            int idx = results[i];
+            const Item &item = m_dataManager->getItems()[idx];
+
+            QTableWidgetItem *item0 = new QTableWidgetItem(QString::number(idx + 1));
+            item0->setTextAlignment(Qt::AlignCenter);
+            tableWidget->setItem(i, 0, item0);
+
+            QTableWidgetItem *item1 = new QTableWidgetItem(
+                QString("%1-%2-%3").arg(item.date.year).arg(item.date.month, 2, 10, QChar('0')).arg(item.date.day, 2, 10, QChar('0')));
+            item1->setTextAlignment(Qt::AlignCenter);
+            tableWidget->setItem(i, 1, item1);
+
+            QTableWidgetItem *item2 = new QTableWidgetItem(DataManager::categoryToDisplayString(item.category));
+            item2->setTextAlignment(Qt::AlignCenter);
+            tableWidget->setItem(i, 2, item2);
+
+            QTableWidgetItem *item3 = new QTableWidgetItem(DataManager::formatAmount(item.amount));
+            item3->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+            tableWidget->setItem(i, 3, item3);
+
+            QTableWidgetItem *item4 = new QTableWidgetItem(item.desc);
+            item4->setTextAlignment(Qt::AlignCenter);
+            tableWidget->setItem(i, 4, item4);
+        }
     }
 }
 
@@ -255,76 +351,27 @@ void Widget::onModifyClicked()
  */
 void Widget::onSearchClicked()
 {
-    QDialog dialog(this);
-    dialog.setWindowTitle("查找账务数据");
-    dialog.resize(600, 450);
-    QVBoxLayout *layout = new QVBoxLayout(&dialog);
+    backupItems = m_dataManager->getItems();
+    isSearchMode = true;
+    currentSearchType = searchType->currentIndex();
+    currentKeyword = keywordEdit->text();
+    inputGroup->hide();
+    searchGroup->show();
 
-    QFormLayout *form = new QFormLayout();
+    loadSearchResults();
 
-    QComboBox *searchType = new QComboBox(&dialog);
-    searchType->addItem("按日期");
-    searchType->addItem("按明细");
-    searchType->addItem("按类型");
-    searchType->addItem("按金额");
-    form->addRow("查找方式:", searchType);
-
-    QLineEdit *keywordEdit = new QLineEdit(&dialog);
-    form->addRow("关键字:", keywordEdit);
-
-    layout->addLayout(form);
-
-    QPushButton *searchBtn = new QPushButton("查找", &dialog);
-    QPushButton *closeBtn = new QPushButton("关闭", &dialog);
-    QHBoxLayout *btnLayout = new QHBoxLayout();
-    btnLayout->addWidget(searchBtn);
-    btnLayout->addWidget(closeBtn);
-    layout->addLayout(btnLayout);
-
-    QTextBrowser *resultBrowser = new QTextBrowser(&dialog);
-    layout->addWidget(resultBrowser);
-
-    connect(searchBtn, &QPushButton::clicked, [&]()
+    connect(searchBtn, &QPushButton::clicked, this, [&]()
             {
-        resultBrowser->clear();
-        int type = searchType->currentIndex();
-        QString keyword = keywordEdit->text();
+        currentSearchType = searchType->currentIndex();
+        currentKeyword = keywordEdit->text();
+        loadSearchResults(); });
 
-        QVector<int> results;
-        if (type == 0)
-            results = m_dataManager->searchByDate(keyword);
-        else if (type == 1)
-            results = m_dataManager->searchByDesc(keyword);
-        else if (type == 2)
-            results = m_dataManager->searchByCategory(keyword);
-        else
-            results = m_dataManager->searchByAmount(keyword);
-
-        if (results.isEmpty())
-        {
-            resultBrowser->setText("未找到匹配的记录!");
-        }
-        else
-        {
-            const QVector<Item> &items = m_dataManager->getItems();
-            QString result = QString("找到 %1 条记录:\n\n").arg(results.size());
-            for (int idx : results)
+    connect(closeSearchBtn, &QPushButton::clicked, this, [&]()
             {
-                const Item &item = items[idx];
-                result += QString("序号:%1 日期:%2-%3-%4 类型:%5 金额:%6 明细:%7\n")
-                              .arg(idx + 1)
-                              .arg(item.date.year)
-                              .arg(item.date.month, 2, 10, QChar('0'))
-                              .arg(item.date.day, 2, 10, QChar('0'))
-                              .arg(DataManager::categoryToDisplayString(item.category))
-                              .arg(DataManager::formatAmount(item.amount))
-                              .arg(item.desc);
-            }
-            resultBrowser->setText(result);
-        } });
-
-    connect(closeBtn, &QPushButton::clicked, &dialog, &QDialog::close);
-    dialog.exec();
+        isSearchMode = false;
+        searchGroup->hide();
+        inputGroup->show();
+        loadDataToTable(); });
 }
 
 /** @brief 排序记录
