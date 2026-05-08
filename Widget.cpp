@@ -130,7 +130,7 @@ void Widget::setupUI()
 
     // 绑定按钮与点击事件
     connect(addButton, &QPushButton::clicked, this, &Widget::onAddClicked);
-connect(addAction, &QAction::triggered, this, [&]()
+    connect(addAction, &QAction::triggered, this, [&]()
             {
         if (inputGroup->isVisible())
         {
@@ -139,13 +139,10 @@ connect(addAction, &QAction::triggered, this, [&]()
         else
         {
             inputGroup->show();
-        }
-    });
+        } });
     connect(closeAddBtn, &QPushButton::clicked, this, [&]()
-            {
-        inputGroup->hide();
-    });
-connect(deleteAction, &QAction::triggered, this, &Widget::onDeleteClicked);
+            { inputGroup->hide(); });
+    connect(deleteAction, &QAction::triggered, this, &Widget::onDeleteClicked);
     connect(modifyAction, &QAction::triggered, this, &Widget::onModifyClicked);
     connect(searchAction, &QAction::triggered, this, [&]()
             {
@@ -158,8 +155,7 @@ connect(deleteAction, &QAction::triggered, this, &Widget::onDeleteClicked);
         else
         {
             onSearchClicked();
-        }
-    });
+        } });
     connect(sortAction, &QAction::triggered, this, &Widget::onSortClicked);
     connect(statisticsAction, &QAction::triggered, this, &Widget::onStatisticsClicked);
     connect(saveAction, &QAction::triggered, this, &Widget::onSaveClicked);
@@ -282,9 +278,9 @@ void Widget::onModifyClicked()
     form->addRow("日期:", editDate);
 
     QComboBox *editCategory = new QComboBox(&dialog);
-    editCategory->addItem("学习(study)", study);
-    editCategory->addItem("生活(life)", life);
-    editCategory->addItem("工作(job)", job);
+    editCategory->addItem("学习", study);
+    editCategory->addItem("生活", life);
+    editCategory->addItem("工作", job);
     editCategory->setCurrentIndex((int)item.category);
     form->addRow("类型:", editCategory);
 

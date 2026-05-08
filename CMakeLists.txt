@@ -12,6 +12,7 @@ qt_add_executable(PersonalCountBook
     date.cpp
     item.cpp
     datamanager.cpp
+    WelcomeWidget.cpp
 )
 
 target_link_libraries(PersonalCountBook
