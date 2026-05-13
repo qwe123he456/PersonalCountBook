@@ -70,6 +70,16 @@ void Widget::setupUI()
     tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
     mainLayout->addWidget(tableWidget, 1);
 
+    // 当焦点从表格移开（点击空白处）时，清除选中状态
+    connect(tableWidget->selectionModel(), &QItemSelectionModel::selectionChanged,
+            this, [&]()
+            {
+                if (tableWidget->selectionModel()->selectedRows().isEmpty())
+                {
+                    currentRow =-1;
+                    // tableWidget->clearSelection();
+                } });
+
     // 数据添加区
     inputGroup = new QGroupBox("添加新记录", this);
     QFormLayout *inputLayout = new QFormLayout();
@@ -260,7 +270,6 @@ void Widget::onDeleteClicked()
  */
 void Widget::onModifyClicked()
 {
-    int currentRow = tableWidget->currentRow(); // 光标所在的账目
     if (currentRow < 0)
     {
         QMessageBox::warning(this, "警告", "请先选择要修改的记录!");
