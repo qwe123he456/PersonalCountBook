@@ -80,6 +80,7 @@ private:
     QPushButton *closeAddBtn;
     bool isSearchMode;
     int currentSearchType;
+    int currentRow; // 当前被选中的行
     QString currentKeyword;
     QVector<Item> backupItems;
 
@@ -87,7 +88,7 @@ private:
      * @brief 初始化所有UI组件
      *
      */
-void setupUI();
+    void setupUI();
     void loadDataToTable();
     void loadSearchResults();
 

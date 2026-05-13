@@ -11,6 +11,7 @@
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
 {
+    currentRow = -1; // 默认不选中任何一行
     m_dataManager = new DataManager();
     setupUI();
     loadDataToTable();
@@ -160,6 +161,10 @@ void Widget::setupUI()
     connect(statisticsAction, &QAction::triggered, this, &Widget::onStatisticsClicked);
     connect(saveAction, &QAction::triggered, this, &Widget::onSaveClicked);
     connect(loadAction, &QAction::triggered, this, &Widget::onLoadClicked);
+    connect(tableWidget, &QTableWidget::cellClicked, this, [&]()
+            {
+                currentRow = tableWidget->currentRow(); // 光标所在的账目
+            });                                         // 任意一行被点击的响应函数
 }
 
 /** @brief 刷新显示表格数据
@@ -224,7 +229,6 @@ void Widget::onAddClicked()
  */
 void Widget::onDeleteClicked()
 {
-    int currentRow = tableWidget->currentRow(); // 光标所在的账目
     if (currentRow < 0)
     {
         QMessageBox::warning(this, "警告", "请先选择要删除的记录!");
